@@ -1,0 +1,64 @@
+{
+  "name": "@esh/tokens",
+  "version": "1.2.1",
+  "description": "ESH Design System — design tokens. Source of truth per colori, tipografia, spacing, radius, shadow, motion.",
+  "author": "Elite Software House",
+  "license": "UNLICENSED",
+  "type": "module",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "sideEffects": [
+    "./dist/css/*.css"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./css": {
+      "import": "./dist/css/all.css",
+      "default": "./dist/css/all.css"
+    },
+    "./css/primitives": "./dist/css/primitives.css",
+    "./css/business-light": "./dist/css/business-light.css",
+    "./css/business-dark": "./dist/css/business-dark.css",
+    "./css/agid-light": "./dist/css/agid-light.css",
+    "./css/agid-dark": "./dist/css/agid-dark.css",
+    "./css/webapp-light": "./dist/css/webapp-light.css",
+    "./css/webapp-dark": "./dist/css/webapp-dark.css",
+    "./css/typography": "./dist/css/typography.css",
+    "./css/spacing": "./dist/css/spacing.css",
+    "./css/motion": "./dist/css/motion.css",
+    "./css/presentation": "./dist/css/presentation.css",
+    "./auto-theme": {
+      "types": "./dist/auto-theme.d.ts",
+      "import": "./dist/auto-theme.js"
+    },
+    "./css/fonts": "./dist/css/fonts.css",
+    "./css/fonts-selfhost": "./dist/css/fonts-selfhost.css",
+    "./scss": "./dist/scss/_tokens.scss",
+    "./json": "./dist/tokens.json",
+    "./fonts/*": "./dist/fonts/*"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  },
+  "scripts": {
+    "build": "node scripts/build-tokens.mjs && node scripts/build-fonts.mjs && tsc",
+    "dev": "node scripts/build-tokens.mjs --watch",
+    "lint": "stylelint \"src/**/*.css\" --allow-empty-input",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "clean": "rm -rf dist"
+  }
+}

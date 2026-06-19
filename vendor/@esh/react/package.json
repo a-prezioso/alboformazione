@@ -1,0 +1,57 @@
+{
+  "name": "@esh/react",
+  "version": "1.2.1",
+  "description": "Wrapper React dei web component @esh/core — via @lit/react. Mantiene firma tipata e prop camelCase.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/esh/design-system.git",
+    "directory": "packages/react"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "@esh/core": "^1.2.1"
+  },
+  "dependencies": {
+    "@lit/react": "^1.0.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0",
+    "vitest": "^1.4.0",
+    "@esh/core": "1.2.1"
+  },
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "test": "vitest run --passWithNoTests",
+    "clean": "rm -rf dist"
+  }
+}

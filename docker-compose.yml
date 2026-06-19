@@ -1,0 +1,75 @@
+services:
+  alboformazione-valkey:
+    image: valkey/valkey:7-alpine
+    container_name: alboformazione-valkey
+    restart: unless-stopped
+    networks:
+      - alboformazione-internal
+    volumes:
+      - alboformazione-valkey-data:/data
+    command: ["valkey-server", "--appendonly", "yes"]
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+
+  alboformazione-web:
+    image: alboformazione-web:${TAG:-latest}
+    container_name: alboformazione-web
+    restart: unless-stopped
+    networks:
+      - traefik-public
+      - alboformazione-internal
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - TZ=Europe/Rome
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - UPLOAD_DIR=/app/data/uploads
+      - REDIS_URL=redis://alboformazione-valkey:6379
+      # SMTP config (incl. credentials) is injected via .env by the CI deploy job.
+    volumes:
+      - alboformazione-data:/app/data
+    depends_on:
+      - alboformazione-valkey
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      # Public router — landing + static + healthz, no auth middleware
+      - "traefik.http.routers.alboformazione-public.rule=Host(`alboformazione.elitesoftwarehouse.com`) && (Path(`/`) || Path(`/favicon.ico`) || Path(`/robots.txt`) || Path(`/api/healthz`) || PathPrefix(`/landing`) || PathPrefix(`/verifica/`) || PathPrefix(`/_next/static/`) || PathPrefix(`/assets/`))"
+      - "traefik.http.routers.alboformazione-public.entrypoints=websecure,lan"
+      - "traefik.http.routers.alboformazione-public.tls=true"
+      - "traefik.http.routers.alboformazione-public.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.alboformazione-public.priority=100"
+      - "traefik.http.routers.alboformazione-public.service=alboformazione-web"
+      # Main router — PUBLIC (no SSO gate). The app uses its own role/membership
+      # model + demo profile switcher; the institutional SSO is a production seam.
+      - "traefik.http.routers.alboformazione-web.rule=Host(`alboformazione.elitesoftwarehouse.com`)"
+      - "traefik.http.routers.alboformazione-web.entrypoints=websecure,lan"
+      - "traefik.http.routers.alboformazione-web.tls=true"
+      - "traefik.http.routers.alboformazione-web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.alboformazione-web.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: '1.5'
+
+volumes:
+  alboformazione-data:
+  alboformazione-valkey-data:
+
+networks:
+  traefik-public:
+    external: true
+  alboformazione-internal:
+    driver: bridge

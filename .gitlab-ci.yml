@@ -1,0 +1,133 @@
+stages:
+  - build
+  - deploy
+  - migrate
+
+variables:
+  IMAGE_NAME: alboformazione-web
+  DEPLOY_PATH: /opt/docker/apps/alboformazione
+
+# Build Next.js standalone image via multi-stage Dockerfile.
+# Design system deploy token is written to .npmrc by the CI and never committed.
+build:
+  stage: build
+  tags:
+    - server1-runner
+  script:
+    - |
+      cat > .npmrc <<EOF
+      @esh:registry=https://git.elitesoftwarehouse.com/api/v4/projects/40/packages/npm/
+      //git.elitesoftwarehouse.com/api/v4/projects/40/packages/npm/:_authToken=${ESH_NPM_TOKEN}
+      EOF
+    - export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+    - docker build
+        --build-arg BUILD_SHA=${CI_COMMIT_SHORT_SHA}
+        --build-arg BUILD_DATE=${BUILD_DATE}
+        -t ${IMAGE_NAME}:${CI_COMMIT_SHORT_SHA}
+        -f ops/docker/web.Dockerfile
+        .
+    - docker tag ${IMAGE_NAME}:${CI_COMMIT_SHORT_SHA} ${IMAGE_NAME}:latest
+  after_script:
+    - rm -f .npmrc
+  only:
+    - prod
+
+deploy:
+  stage: deploy
+  tags:
+    - server1-runner
+  script:
+    - mkdir -p ${DEPLOY_PATH}
+    - cp docker-compose.yml ${DEPLOY_PATH}/docker-compose.yml
+    - |
+      cat > ${DEPLOY_PATH}/.env <<EOF
+      DATABASE_URL=${ALBOFORMAZIONE_DATABASE_URL}
+      AI_GATEWAY_URL=http://10.0.0.100:8000
+      AI_GATEWAY_API_KEY=${ALBOFORMAZIONE_AI_GATEWAY_API_KEY}
+      AI_GATEWAY_TENANT=alboformazione
+      APP_BASE_URL=https://alboformazione.elitesoftwarehouse.com
+      ADAPTER_MODE=mock
+      REMINDER_TOKEN=${ALBOFORMAZIONE_REMINDER_TOKEN}
+      SMTP_HOST=smtp.gmail.com
+      SMTP_PORT=587
+      SMTP_USER=${ALBOFORMAZIONE_SMTP_USER}
+      SMTP_PASS=${ALBOFORMAZIONE_SMTP_PASS}
+      MAIL_FROM=Albo Formazione <a.prezioso@elitesoftwarehouse.com>
+      MAIL_ENABLED=true
+      EOF
+    - chmod 600 ${DEPLOY_PATH}/.env
+    - export TAG=${CI_COMMIT_SHORT_SHA}
+    - cd ${DEPLOY_PATH}
+    - docker compose up -d --force-recreate
+    - |
+      echo "Waiting for alboformazione-web to become healthy..."
+      for i in $(seq 1 30); do
+        STATUS=$(docker inspect --format='{{.State.Health.Status}}' alboformazione-web 2>/dev/null || echo "starting")
+        if [ "$STATUS" = "healthy" ]; then
+          echo "alboformazione-web is healthy."
+          break
+        fi
+        echo "  attempt $i/30: $STATUS"
+        sleep 5
+      done
+      if [ "$STATUS" != "healthy" ]; then
+        echo "alboformazione-web failed to become healthy in time"
+        docker logs alboformazione-web --tail 80
+        exit 1
+      fi
+    - |
+      echo "Smoke test via Traefik (retry x6, 5s)..."
+      for i in $(seq 1 6); do
+        CODE=$(curl -sk -o /dev/null -w "%{http_code}" \
+          --resolve alboformazione.elitesoftwarehouse.com:443:10.0.0.102 \
+          https://alboformazione.elitesoftwarehouse.com/api/healthz || echo "000")
+        echo "  attempt $i/6: HTTP $CODE"
+        if [ "$CODE" = "200" ]; then
+          echo "  smoke test passed"
+          exit 0
+        fi
+        sleep 5
+      done
+      echo "Smoke test failed (Traefik discovery / Let's Encrypt cert may need more time on first deploy)"
+      exit 1
+  only:
+    - prod
+
+# Manual migration job: builds a small image with @alboformazione/db and runs
+# migrate.ts against the DB. Idempotent — safe to re-run. Run db:seed via SEED=1.
+migrate:db:
+  stage: migrate
+  tags:
+    - server1-runner
+  when: manual
+  script:
+    - |
+      cat > .npmrc <<EOF
+      @esh:registry=https://git.elitesoftwarehouse.com/api/v4/projects/40/packages/npm/
+      //git.elitesoftwarehouse.com/api/v4/projects/40/packages/npm/:_authToken=${ESH_NPM_TOKEN}
+      EOF
+    - docker build -t alboformazione-migrator:${CI_COMMIT_SHORT_SHA} -f ops/docker/migrator.Dockerfile .
+    - docker run --rm --network host
+        -e DATABASE_URL="${ALBOFORMAZIONE_DATABASE_URL}"
+        -e SEED="${SEED:-0}"
+        alboformazione-migrator:${CI_COMMIT_SHORT_SHA}
+  after_script:
+    - rm -f .npmrc
+  only:
+    - prod
+
+# Scheduled reminders: hit the cron endpoint daily (via GitLab pipeline schedule).
+# Runs only on scheduled pipelines, not on normal commits.
+reminders:cron:
+  stage: deploy
+  tags:
+    - server1-runner
+  script:
+    - |
+      CODE=$(curl -sk -o /tmp/rem.json -w "%{http_code}" \
+        --resolve alboformazione.elitesoftwarehouse.com:443:10.0.0.102 \
+        "https://alboformazione.elitesoftwarehouse.com/api/cron/reminders?token=${ALBOFORMAZIONE_REMINDER_TOKEN}")
+      echo "reminders endpoint -> HTTP $CODE"; cat /tmp/rem.json
+      [ "$CODE" = "200" ] || exit 1
+  only:
+    - schedules

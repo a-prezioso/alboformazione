@@ -1,0 +1,182 @@
+{
+  "name": "@esh/core",
+  "version": "1.2.1",
+  "description": "ESH Design System — web components (Lit + TypeScript). Universali: funzionano in HTML, Thymeleaf, Angular, React, Vue, Svelte.",
+  "author": "Elite Software House",
+  "license": "UNLICENSED",
+  "type": "module",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "sideEffects": [
+    "./dist/**/*.js"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "customElements": "./dist/custom-elements.json",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./button": {
+      "types": "./dist/components/button/index.d.ts",
+      "import": "./dist/components/button/index.js"
+    },
+    "./input": {
+      "types": "./dist/components/input/index.d.ts",
+      "import": "./dist/components/input/index.js"
+    },
+    "./card": {
+      "types": "./dist/components/card/index.d.ts",
+      "import": "./dist/components/card/index.js"
+    },
+    "./badge": {
+      "types": "./dist/components/badge/index.d.ts",
+      "import": "./dist/components/badge/index.js"
+    },
+    "./checkbox": {
+      "types": "./dist/components/checkbox/index.d.ts",
+      "import": "./dist/components/checkbox/index.js"
+    },
+    "./switch": {
+      "types": "./dist/components/switch/index.d.ts",
+      "import": "./dist/components/switch/index.js"
+    },
+    "./avatar": {
+      "types": "./dist/components/avatar/index.d.ts",
+      "import": "./dist/components/avatar/index.js"
+    },
+    "./icon-button": {
+      "types": "./dist/components/icon-button/index.d.ts",
+      "import": "./dist/components/icon-button/index.js"
+    },
+    "./divider": {
+      "types": "./dist/components/divider/index.d.ts",
+      "import": "./dist/components/divider/index.js"
+    },
+    "./tag": {
+      "types": "./dist/components/tag/index.d.ts",
+      "import": "./dist/components/tag/index.js"
+    },
+    "./spinner": {
+      "types": "./dist/components/spinner/index.d.ts",
+      "import": "./dist/components/spinner/index.js"
+    },
+    "./tabs": {
+      "types": "./dist/components/tabs/index.d.ts",
+      "import": "./dist/components/tabs/index.js"
+    },
+    "./tooltip": {
+      "types": "./dist/components/tooltip/index.d.ts",
+      "import": "./dist/components/tooltip/index.js"
+    },
+    "./select": {
+      "types": "./dist/components/select/index.d.ts",
+      "import": "./dist/components/select/index.js"
+    },
+    "./dialog": {
+      "types": "./dist/components/dialog/index.d.ts",
+      "import": "./dist/components/dialog/index.js"
+    },
+    "./radio": {
+      "types": "./dist/components/radio/index.d.ts",
+      "import": "./dist/components/radio/index.js"
+    },
+    "./slider": {
+      "types": "./dist/components/slider/index.d.ts",
+      "import": "./dist/components/slider/index.js"
+    },
+    "./progress": {
+      "types": "./dist/components/progress/index.d.ts",
+      "import": "./dist/components/progress/index.js"
+    },
+    "./accordion": {
+      "types": "./dist/components/accordion/index.d.ts",
+      "import": "./dist/components/accordion/index.js"
+    },
+    "./breadcrumb": {
+      "types": "./dist/components/breadcrumb/index.d.ts",
+      "import": "./dist/components/breadcrumb/index.js"
+    },
+    "./stepper": {
+      "types": "./dist/components/stepper/index.d.ts",
+      "import": "./dist/components/stepper/index.js"
+    },
+    "./menu": {
+      "types": "./dist/components/menu/index.d.ts",
+      "import": "./dist/components/menu/index.js"
+    },
+    "./drawer": {
+      "types": "./dist/components/drawer/index.d.ts",
+      "import": "./dist/components/drawer/index.js"
+    },
+    "./toast": {
+      "types": "./dist/components/toast/index.d.ts",
+      "import": "./dist/components/toast/index.js"
+    },
+    "./icon": {
+      "types": "./dist/components/icon/index.d.ts",
+      "import": "./dist/components/icon/index.js"
+    },
+    "./focus-ring": {
+      "types": "./dist/components/focus-ring/index.d.ts",
+      "import": "./dist/components/focus-ring/index.js"
+    },
+    "./list": {
+      "types": "./dist/components/list/index.d.ts",
+      "import": "./dist/components/list/index.js"
+    },
+    "./pagination": {
+      "types": "./dist/components/pagination/index.d.ts",
+      "import": "./dist/components/pagination/index.js"
+    },
+    "./fab": {
+      "types": "./dist/components/fab/index.d.ts",
+      "import": "./dist/components/fab/index.js"
+    },
+    "./navigation-bar": {
+      "types": "./dist/components/navigation-bar/index.d.ts",
+      "import": "./dist/components/navigation-bar/index.js"
+    },
+    "./data-table": {
+      "types": "./dist/components/data-table/index.d.ts",
+      "import": "./dist/components/data-table/index.js"
+    },
+    "./custom-elements.json": "./dist/custom-elements.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "peerDependencies": {
+    "@esh/tokens": "^1.2.1"
+  },
+  "dependencies": {
+    "lit": "^3.1.0"
+  },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.9.0",
+    "axe-core": "^4.9.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0",
+    "vitest": "^1.4.0",
+    "jsdom": "^24.0.0",
+    "@open-wc/testing": "^4.0.0",
+    "@esh/tokens": "1.2.1"
+  },
+  "scripts": {
+    "build": "vite build && node -e \"require('fs').rmSync('tsconfig.tsbuildinfo',{force:true})\" && tsc --emitDeclarationOnly && node ../../scripts/emit-component-stubs.mjs . && npm run analyze",
+    "dev": "vite build --watch",
+    "lint": "eslint \"src/**/*.ts\" && stylelint \"src/**/*.css\" --allow-empty-input",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "analyze": "cem analyze --config custom-elements-manifest.config.js",
+    "analyze:watch": "cem analyze --config custom-elements-manifest.config.js --watch",
+    "gen:component": "node ../../scripts/gen-component.mjs",
+    "clean": "rm -rf dist"
+  }
+}

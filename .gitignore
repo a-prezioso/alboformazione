@@ -1,0 +1,19 @@
+node_modules
+.next
+.turbo
+.localdb
+dist
+build
+coverage
+.DS_Store
+.env
+.env.local
+.env.production
+.npmrc
+*.log
+.vscode
+.idea
+
+# build artifacts
+apps/web/tsconfig.tsbuildinfo
+*.tsbuildinfo

@@ -1,0 +1,49 @@
+{
+  "name": "@esh/icons",
+  "version": "1.2.1",
+  "description": "ESH Design System — libreria icone come web component.",
+  "author": "Elite Software House",
+  "license": "UNLICENSED",
+  "type": "module",
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "sideEffects": [
+    "./dist/**/*.js"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./svg/*": "./dist/svg/*"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "peerDependencies": {
+    "@esh/tokens": "^1.2.1"
+  },
+  "dependencies": {
+    "lit": "^3.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0",
+    "vitest": "^1.4.0",
+    "@esh/tokens": "1.2.1"
+  },
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "dev": "vite build --watch",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "clean": "rm -rf dist"
+  }
+}
